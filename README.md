@@ -22,6 +22,17 @@ cd D:\MyProgram\astral-atlas
 npm run dev
 ```
 
+## GitHub Pages 部署
+
+`.github/workflows/pages.yml` 会在推送到 `main` 时运行测试、构建并部署，也支持在 Actions 页面手动执行。仓库需要先在 Settings → Pages 中启用 GitHub Actions 作为发布来源；私有仓库需要支持 Pages 的 GitHub 套餐。
+
+```sh
+npm run build:pages
+npm run preview -- --mode github-pages
+```
+
+Pages 构建使用 `/astral-atlas/` 资源路径，普通本地构建仍使用根路径。预览时访问终端地址下的 `/astral-atlas/`。启用 Pages 并成功部署后，站点地址为 https://52hzmercury.github.io/astral-atlas/ ，文章可通过 `#/articles/orion` 等地址直接访问。
+
 ## 交互与数据
 
 - 拖拽轨道图旋转；选择框与行星条目同步选择；提供暂停和重置视角。

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b \u0026\u0026 vite build",
+    "build:pages": "tsc -b && vite build --mode github-pages",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --experimental-strip-types --test tests/data.test.ts"
   },

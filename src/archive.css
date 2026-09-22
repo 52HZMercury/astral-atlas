@@ -1262,3 +1262,64 @@
 .archive-document h1:focus {
   outline: none;
 }
+
+/* Seasonal archive index: compact rows, not a wall of decorative covers. */
+.archive-filters { grid-column: 1 / -1; padding: 26px; border-bottom: 1px solid #2b3743; min-width: 0; }
+.archive-filter-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.archive-filter-heading label { display: flex; align-items: center; gap: 12px; color: #a5b4c1; font-size: 12px; }
+.archive-filter-heading select { color: #f0f4f8; background: #141e29; border: 1px solid #3c4c5e; border-radius: 0; padding: 10px 12px; min-height: 44px; }
+.archive-season-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 23px 0; }
+.archive-season-buttons button { display: flex; align-items: center; gap: 22px; min-height: 44px; padding: 12px 19px; color: #adbac7; background: transparent; border: 1px solid #334251; font-size: 14px; transition: color .25s, background .25s, border-color .25s; }
+.archive-season-buttons button span { font: 11px var(--font-mono); color: #91a0b0; }
+.archive-season-buttons button:hover { background: #1a2633; color: #f0f4f8; }
+.archive-season-buttons button[aria-pressed="true"] { border-color: #d57b56; color: #f4c0a7; background: #e0623612; }
+.archive-find-row { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
+.archive-find-row label { color: #c6d0d9; font-size: 13px; }
+.archive-find-row input { min-width: 0; flex: 1; max-width: 440px; padding: 13px 15px; min-height: 44px; background: #0a1018; color: #f0f4f8; border: 1px solid #3c4c5e; border-radius: 0; font: inherit; font-size: 14px; }
+.archive-find-row input::placeholder { color: #899baa; }
+.archive-find-row [role="status"] { font: 11px var(--font-mono); color: #b8c5d1; }
+.archive-season-note { font-size: 12px; line-height: 1.9; max-width: 900px; color: #94a7b8; margin: 16px 0 20px; }
+.archive-season-note a { display: inline-flex; align-items: center; gap: 3px; margin-left: 8px; color: #ddb299; text-decoration: underline; text-underline-offset: 3px; }
+.archive-directory { display: grid; grid-template-columns: 1fr 1fr; column-gap: 30px; max-height: 280px; overflow-y: auto; scrollbar-color: #536474 #111c28; scrollbar-width: thin; padding: 3px; scroll-padding: 5px; }
+.archive-directory button { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 15px 10px; min-height: 66px; background: transparent; border: 0; border-bottom: 1px solid #293746; text-align: left; color: #a1b2c1; transition: background .25s, color .25s; }
+.archive-directory button > span:first-child { font: 12px var(--font-mono); color: #be886c; }
+.archive-directory button strong { font-size: 15px; font-weight: 500; color: #e2e8ef; }
+.archive-directory button strong small { display: block; margin-top: 5px; font: 9px var(--font-mono); color: #8c9eae; letter-spacing: .05em; overflow-wrap: anywhere; }
+.archive-directory button > span:last-child { display: flex; gap: 12px; align-items: center; font-size: 11px; }
+.archive-directory button:hover { background: #192633; }
+.archive-directory button[aria-pressed="true"] { background: #e0623610; box-shadow: inset 2px 0 #e06236; }
+.archive-directory button[aria-pressed="true"] strong { color: #f1baa0; }
+.archive-directory button:focus-visible { outline-offset: -2px; }
+.archive-empty { grid-column: 1 / -1; padding: 50px 26px; color: #a5b5c3; }
+.archive-empty h3 { color: #e1e8ef; font-size: 23px; font-weight: 500; margin: 18px 0 12px; }
+.archive-empty p { line-height: 1.8; font-size: 14px; }
+.archive-empty button { margin-top: 20px; padding: 13px 18px; background: #e06236; color: #0a0e14; border: 1px solid #e06236; }
+.archive-callout > .archive-location-note { font-size: 12px; line-height: 1.9; color: #a4b5c5; border-left: 1px solid #56677c; padding-left: 12px; margin-top: 18px; }
+.archive-story-note { border-left: 2px solid #c27552; padding: 8px 0 8px 16px; color: #b5c1cc; font-size: 13px; line-height: 1.9; }
+.archive-collection-note { line-height: 1.9; }
+.archive-collection-note a { color: #c99a80; text-decoration: underline; text-underline-offset: 3px; }
+.plate-catalog-stamp { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; color: #d3b29b; }
+.plate-catalog-stamp::before { content: ''; position: absolute; width: 136px; height: 136px; border: 1px solid #a1b7c144; border-radius: 50%; z-index: -1; }
+.plate-catalog-stamp > span { font: 7px var(--font-mono); letter-spacing: .1em; color: #9cacb8; }
+.plate-catalog-stamp strong { font: 500 65px var(--font-sans); letter-spacing: -.055em; line-height: 1.15; }
+.plate-catalog-stamp small { font-size: 8px; color: #a7b8c3; }
+@media (max-width: 640px) {
+  .archive-filters { padding: 20px 16px; }
+  .archive-filter-heading { gap: 12px; }
+  .archive-season-buttons { gap: 5px; }
+  .archive-season-buttons button { gap: 8px; padding: 10px 11px; font-size: 13px; }
+  .archive-find-row { gap: 10px; }
+  .archive-find-row label { width: 100%; }
+  .archive-find-row input { flex-basis: 100%; }
+  .archive-directory { grid-template-columns: 1fr; max-height: 270px; }
+  .archive-directory button { gap: 10px; padding: 13px 8px; }
+  .archive-season-note { font-size: 11px; }
+  .archive-story-note { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .archive-season-buttons button, .archive-directory button { transition: none; }
+}.archive-directory-row { display: flex; align-items: stretch; min-width: 0; border-bottom: 1px solid #293746; }
+.archive-directory-row button { flex: 1; min-width: 0; border-bottom: 0; }
+.archive-directory-row > a { display: flex; align-items: center; gap: 4px; padding: 0 8px; color: #caa48e; font-size: 11px; min-width: 52px; justify-content: center; }
+.archive-directory-row > a:hover { background: #1c2935; color: #f0c6b0; }
+.archive-directory-row > a:focus-visible { outline-offset: -2px; }

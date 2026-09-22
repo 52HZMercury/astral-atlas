@@ -15,6 +15,7 @@ import {
   Orbit,
 } from "lucide-react";
 import { articles } from "./data";
+import { seasons, SEASON_SOURCE, CATALOG_SOURCE, type Season } from "./constellationCatalog";
 import "./archive.css";
 
 type Article = (typeof articles)[number];
@@ -81,6 +82,13 @@ function ArchivePlate({ article }: { article: Article }) {
             ))}
           </svg>
         )}
+        {article.constellation && !article.sketch && (
+          <span className="plate-catalog-stamp">
+            <span>CONSTELLATION / 编目图章</span>
+            <strong>{article.constellation.abbr}</strong>
+            <small>{article.constellation.origin} · 非观测星图</small>
+          </span>
+        )}
         {article.image === "saturn" && (
           <>
             <span className="plate-orbit orbit-outer" />
@@ -127,14 +135,35 @@ export function ArchiveBrowser({
 }) {
   const article = articles[selected];
   const root = useRef<HTMLElement>(null);
-  const constellation = article.category === "星座辨认";
+  const constellation = !!article.constellation;
+  const [season, setSeason] = useState("全部");
+  const [query, setQuery] = useState("");
+  const [hemisphere, setHemisphere] = useState("north");
+  const seasonName = (value: Season, half = hemisphere) =>
+    seasons[(seasons.indexOf(value) + (half === "south" ? 2 : 0)) % seasons.length];
+  const matches = (record: Article, s: string, q: string, half: string) =>
+    !!record.constellation &&
+    (s === "全部" || seasonName(record.constellation.season, half) === s) &&
+    `${record.archiveTitle} ${record.archiveEn} ${record.constellation.abbr} ${record.slug} ${record.slug === "aquarius" ? "水瓶" : record.slug === "virgo" ? "处女" : record.slug === "sagittarius" ? "射手" : ""}`
+      .toLocaleLowerCase().includes(q.trim().toLocaleLowerCase());
   const collection = articles
     .map((record, index) => ({ record, index }))
-    .filter(({ record }) => (record.category === "星座辨认") === constellation);
+    .filter(({ record }) => constellation
+      ? matches(record, season, query, hemisphere)
+      : !record.constellation);
   const position = collection.findIndex((record) => record.index === selected);
+  const chooseFilters = (s: string, q: string, half: string) => {
+    setSeason(s);
+    setQuery(q);
+    setHemisphere(half);
+    if (!matches(article, s, q, half)) {
+      const first = articles.findIndex((record) => matches(record, s, q, half));
+      if (first !== -1) onSelect(first);
+    }
+  };
   const remembered = useRef({
     constellation: articles.findIndex(
-      (record) => record.category === "星座辨认",
+      (record) => !!record.constellation,
     ),
     foundation: 0,
   });
@@ -142,9 +171,14 @@ export function ArchiveBrowser({
     remembered.current[constellation ? "constellation" : "foundation"] =
       selected;
   }, [selected, constellation]);
-  const change = (index: number) =>
+  const change = (index: number) => {
+    if (!collection.length) return;
+    const focusCover = document.activeElement?.closest(".archive-deck");
     onSelect(collection[(index + collection.length) % collection.length].index);
+    if (focusCover) requestAnimationFrame(() => root.current?.querySelector<HTMLButtonElement>(".archive-object.is-selected")?.focus({ preventScroll: true }));
+  };
   const handleKeys = (event: KeyboardEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest(".archive-filters")) return;
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
@@ -174,7 +208,7 @@ export function ArchiveBrowser({
       <div className="section-heading">
         <span className="eyebrow">ASTRAL ATLAS / 天文知识档案</span>
         <h2>把每一次仰望，收进档案。</h2>
-        <p>选择一份档案，从一个问题读懂一片宇宙。</p>
+        <p>循着四季找到星座，读它的故事，再回到真实的夜空。</p>
       </div>
       <div
         className="archive-browser"
@@ -192,7 +226,11 @@ export function ArchiveBrowser({
         >
           <button
             aria-pressed={constellation}
-            onClick={() => onSelect(remembered.current.constellation)}
+            onClick={() => {
+              setSeason("全部");
+              setQuery("");
+              onSelect(remembered.current.constellation);
+            }}
           >
             星座档案 <span>CONSTELLATIONS</span>
           </button>
@@ -203,11 +241,61 @@ export function ArchiveBrowser({
             宇宙基础 <span>FUNDAMENTALS</span>
           </button>
         </div>
+        {constellation && (
+          <div className="archive-filters">
+            <div className="archive-filter-heading">
+              <span className="eyebrow">SEASONAL INDEX / 四季星座索引</span>
+              <label>季节参照
+                <select value={hemisphere} onChange={(e) => chooseFilters(season, query, e.target.value)}>
+                  <option value="north">北半球</option>
+                  <option value="south">南半球</option>
+                </select>
+              </label>
+            </div>
+            <div className="archive-season-buttons" role="group" aria-label="按季节筛选星座">
+              {["全部", ...seasons].map((s) => (
+                <button key={s} aria-pressed={season === s} onClick={() => chooseFilters(s, query, hemisphere)}>
+                  {s}<span>{articles.filter((a) => matches(a, s, "", hemisphere)).length}</span>
+                </button>
+              ))}
+            </div>
+            <div className="archive-find-row">
+              <label htmlFor="constellation-find">按星座定位</label>
+              <input id="constellation-find" type="search" value={query} placeholder="中文名、拉丁名或 IAU 缩写" onChange={(e) => chooseFilters(season, e.target.value, hemisphere)} />
+              <span role="status">{collection.length} 份匹配档案</span>
+            </div>
+            <p className="archive-season-note">
+              按{hemisphere === "north" ? "北" : "南"}半球晚间季节编目，并非只在该季节可见。南北半球季节相反，切换不改变星座的地理可见范围；近极星群在合适纬度可全年见到。
+              <a href={SEASON_SOURCE} target="_blank" rel="noreferrer">季节分组依据 <ArrowUpRight size={12} /></a>
+            </p>
+            <div className="archive-directory" role="group" aria-label="星座目录">
+              {collection.map(({ record, index }) => (
+                <div className="archive-directory-row" key={record.slug}>
+                <button aria-pressed={index === selected} onClick={() => onSelect(index)}>
+                  <span>{record.constellation!.abbr}</span>
+                  <strong>{record.archiveTitle}<small>{record.archiveEn}</small></strong>
+                  <span>{seasonName(record.constellation!.season)}</span>
+                </button>
+                <a href={`#/articles/${record.slug}`} onClick={() => onSelect(index)} aria-label={`阅读${record.archiveTitle}档案`}>阅读<ArrowUpRight size={14} /></a>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {collection.length === 0 ? (
+          <div className="archive-empty" role="status">
+            <FileText size={26} strokeWidth={1} />
+            <h3>该天区暂无观测数据</h3>
+            <p>当前条件未匹配到星座档案，可更换名称或清除筛选。</p>
+            <button onClick={() => chooseFilters("全部", "", hemisphere)}>查看全部星座</button>
+          </div>
+        ) : <>
         <div className="archive-stage" role="group" aria-label="选择档案">
           <div className="archive-deck">
             {collection.map(({ record, index }, slot) => {
               const offset =
                 (slot - position + collection.length) % collection.length;
+              if (offset >= 3) return null;
               return (
                 <button
                   key={record.slug}
@@ -237,6 +325,12 @@ export function ArchiveBrowser({
           <div className="archive-rule" />
           <h3 key={article.slug}>{article.title}</h3>
           <p>{article.description}</p>
+          {article.constellation && (
+            <p className="archive-location-note">
+              {seasonName(article.constellation.season)}晚间档案 · {article.constellation.origin}<br />
+              {article.constellation.visibility}
+            </p>
+          )}
           <dl className="archive-preview-meta">
             <div>
               <dt>编目主题</dt>
@@ -273,7 +367,7 @@ export function ArchiveBrowser({
               <ChevronLeft size={18} />
             </button>
             <div className="archive-indices">
-              {collection.map(({ record, index }) => (
+              {collection.length <= 3 && collection.map(({ record, index }) => (
                 <button
                   key={record.slug}
                   onClick={() => onSelect(index)}
@@ -293,9 +387,10 @@ export function ArchiveBrowser({
           </div>
           <span className="archive-key-hint">← → 切换档案 · Tab 选择操作</span>
         </div>
+        </>}
       </div>
       <p className="archive-collection-note">
-        档案编号为本站编目。封面为主题示意，正文附原始科学资料链接。
+        <a href={CATALOG_SOURCE} target="_blank" rel="noreferrer">全天星座名录与缩写依据</a> · 档案编号为本站编目，封面为编目图章或识别示意。故事为原创中文整理，神话与命名历史分开标注，逐篇附资料链接。
       </p>
     </section>
   );
@@ -409,6 +504,11 @@ export function ArchiveReader({ article }: { article: Article }) {
             {article.archiveTitle}
           </h1>
           <p className="archive-document-en">{article.archiveEn}</p>
+          {article.constellation && (
+            <p className="archive-story-note">
+              {article.constellation.origin} · 文化叙事与观测事实分开记录，同一形象可能有多个传说版本。
+            </p>
+          )}
           <div className="archive-rule" />
           <dl className="archive-metadata">
             <div>
@@ -417,7 +517,7 @@ export function ArchiveReader({ article }: { article: Article }) {
             </div>
             <div>
               <dt>TYPE / 文档类型</dt>
-              <dd>中文科普整理</dd>
+              <dd>{article.constellation?.origin ?? "中文科普整理"}</dd>
             </div>
             <div>
               <dt>REFERENCES / 文献依据</dt>
@@ -433,6 +533,16 @@ export function ArchiveReader({ article }: { article: Article }) {
               <dt>COLLECTION / 编目</dt>
               <dd>{article.archiveId} · 星序知识库</dd>
             </div>
+            {article.constellation && <>
+              <div>
+                <dt>SEASON / 晚间季节</dt>
+                <dd>北半球{article.constellation.season} · 南半球{seasons[(seasons.indexOf(article.constellation.season) + 2) % 4]}</dd>
+              </div>
+              <div>
+                <dt>VISIBILITY / 可见范围</dt>
+                <dd>{article.constellation.visibility}</dd>
+              </div>
+            </>}
           </dl>
           <div className="archive-tabs" role="tablist" aria-label="档案内容">
             {tabs.map((tab, i) => (
@@ -506,11 +616,11 @@ export function ArchiveReader({ article }: { article: Article }) {
             {active === "sources" && (
               <div className="archive-sources">
                 <span className="archive-panel-label">
-                  REFERENCES / 原始资料
+                  REFERENCES / 资料来源
                 </span>
                 <h2>让每一份知识，都有出处。</h2>
                 <p>
-                  本档案为中文科普整理。以下是原始资料与延伸阅读，点击将在新窗口打开。
+                  本档案为原创中文整理，并非逐字翻译。故事与命名史据逐星座资料核对；季节表用于编目，不替代设定了地点和时间的星图。以下资料在新窗口打开。
                 </p>
                 {article.sources.map((source, i) => (
                   <a

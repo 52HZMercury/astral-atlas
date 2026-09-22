@@ -1,3 +1,6 @@
+import { constellationCatalog, SEASON_SOURCE, type Season } from "./constellationCatalog.ts";
+import { constellationStories } from "./constellationStories.ts";
+
 export const NASA_FACTS = "https://nssdc.gsfc.nasa.gov/planetary/factsheet/";
 export const AU_SOURCE = "https://www.iau.org/public/themes/measuring/";
 export const KP_URL =
@@ -123,6 +126,7 @@ export type Article = {
   title: string;
   description: string;
   image: "saturn" | "stars" | "moon" | "constellation";
+  constellation?: { abbr: string; season: Season; origin: string; visibility: string };
   sketch?: {
     points: [number, number][];
     links: [number, number][];
@@ -131,7 +135,7 @@ export type Article = {
   sections: [string, string][];
   sources: { label: string; url: string }[];
 };
-export const articles: Article[] = [
+const baseArticles: Article[] = [
   {
     slug: "solar-system-scale",
     archiveId: "AA-001",
@@ -435,4 +439,40 @@ export const articles: Article[] = [
       },
     ],
   },
+];
+
+// Preserve published archive IDs and routes while enriching the original three files.
+let nextArchiveId = 7;
+export const articles: Article[] = [
+  ...baseArticles.filter((a) => a.image !== "constellation"),
+  ...constellationCatalog.map((record): Article => {
+    const story = constellationStories.find((item) => item[0] === record.abbr);
+    if (!story) throw new Error(`Missing constellation story: ${record.abbr}`);
+    const [, name, title, origin, body, note, sky] = story;
+    const previous = baseArticles.find((a) => a.slug === record.slug);
+    return {
+      slug: record.slug,
+      archiveId: previous?.archiveId ?? `AA-${String(nextArchiveId++).padStart(3, "0")}`,
+      archiveTitle: name,
+      archiveEn: record.en.toUpperCase(),
+      category: "星座故事",
+      title,
+      description: `${name} · ${body.split("。").slice(0, 2).join("。")}。`,
+      image: "constellation",
+      sketch: previous?.sketch,
+      constellation: { abbr: record.abbr, season: record.season, origin, visibility: record.visibility },
+      sections: [
+        [`${origin} · ${title}`, body],
+        ["版本与名称辨析", note],
+        ["从故事回到夜空", sky],
+        ["季节与观测条件", `本档案按北半球的${record.season}晚间星空编排，南半球对应相反季节。季节是查阅线索，不代表只在这个季节可见。${record.visibility}近极星座在合适纬度可能全年可见；改变观测时刻也会改变能看到的星空。分组依据见参考资料中的季节星空表。`],
+        ...(previous?.sections ?? []),
+      ],
+      sources: [
+        { label: `Constellation Guide · ${record.en}：来历、星图与观测资料`, url: record.url },
+        { label: "Constellation Guide · 晚间季节分组与适用条件", url: SEASON_SOURCE },
+        ...(previous?.sources ?? []),
+      ],
+    };
+  }),
 ];

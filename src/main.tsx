@@ -144,6 +144,7 @@ function App() {
             <a href="#knowledge">宇宙知识</a>
             <a href="#observatory">观测数据</a>
             <a href="#reading">天文档案</a>
+            <a href="#spacecraft" onClick={() => setSelectedArchive(articles.findIndex((a) => !!a.spacecraft))}>深空探测器</a>
           </nav>
           <a className="header-action" href="#solar-system">
             开启探索 <ArrowUpRight size={16} />

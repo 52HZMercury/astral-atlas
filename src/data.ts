@@ -1,5 +1,6 @@
 import { constellationCatalog, SEASON_SOURCE, type Season } from "./constellationCatalog.ts";
 import { constellationStories } from "./constellationStories.ts";
+import { spacecraftArticles, type SpacecraftKind } from "./spacecraft.ts";
 
 export const NASA_FACTS = "https://nssdc.gsfc.nasa.gov/planetary/factsheet/";
 export const AU_SOURCE = "https://www.iau.org/public/themes/measuring/";
@@ -125,7 +126,8 @@ export type Article = {
   category: string;
   title: string;
   description: string;
-  image: "saturn" | "stars" | "moon" | "constellation";
+  image: "saturn" | "stars" | "moon" | "constellation" | "spacecraft";
+  spacecraft?: { kind: SpacecraftKind; target: string; type: string };
   constellation?: { abbr: string; season: Season; origin: string; visibility: string };
   sketch?: {
     points: [number, number][];
@@ -475,4 +477,5 @@ export const articles: Article[] = [
       ],
     };
   }),
+  ...spacecraftArticles,
 ];

@@ -47,7 +47,7 @@ test("all article routes are unique and contain complete sourced sections", () =
     }
   }
   assert.ok(
-    articles.every((a) => a.sections.length >= 4 && a.sources.length >= 2),
+    articles.every((a) => a.sections.length >= 4 && a.sources.length >= (a.spacecraft ? 1 : 2)),
   );
 });
 test("all 88 constellations have distinct stories, seasonal coverage and preserved public routes", () => {
@@ -55,7 +55,7 @@ test("all 88 constellations have distinct stories, seasonal coverage and preserv
   assert.equal(constellationStories.length, 88);
   assert.equal(new Set(constellationStories.map((s) => s[0])).size, 88);
   assert.equal(new Set(constellationStories.map((s) => s[4])).size, 88);
-  assert.equal(articles.length, 91);
+  assert.equal(articles.length, 99);
   for (const record of constellationCatalog) {
     const article = articles.find((a) => a.slug === record.slug)!;
     assert.equal(article.constellation?.abbr, record.abbr);
@@ -72,4 +72,18 @@ test("all 88 constellations have distinct stories, seasonal coverage and preserv
     assert.ok(article.sections.length > 4);
   }
   assert.equal(articles.filter((a) => a.constellation?.abbr === "Ser").length, 1);
+});
+
+test("spacecraft archives preserve the catalogue and cite mission agencies", () => {
+  const craft = articles.filter((a) => a.spacecraft);
+  assert.equal(craft.length, 8);
+  assert.equal(articles.filter((a) => !a.constellation && !a.spacecraft).length, 3);
+  assert.equal(new Set(craft.map((a) => a.spacecraft!.kind)).size, 8);
+  craft.forEach((a, i) => {
+    assert.equal(a.archiveId, `AA-${String(92 + i).padStart(3, "0")}`);
+    assert.equal(a.image, "spacecraft");
+    assert.ok(a.sections.every(([title, body]) => title.length > 0 && body.length > 60));
+    assert.ok(a.sources.every((s) => ["science.nasa.gov", "www.esa.int", "www.cnsa.gov.cn"].includes(new URL(s.url).hostname)));
+    assert.ok(a.spacecraft!.target && a.spacecraft!.type);
+  });
 });

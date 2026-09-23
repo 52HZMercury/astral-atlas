@@ -15,6 +15,7 @@ import {
   Orbit,
 } from "lucide-react";
 import { articles } from "./data";
+import { SpacecraftDrawing } from "./SpacecraftDrawing";
 import { seasons, SEASON_SOURCE, CATALOG_SOURCE, type Season } from "./constellationCatalog";
 import "./archive.css";
 
@@ -41,6 +42,7 @@ function ArchivePlate({ article }: { article: Article }) {
         <span>{article.archiveId}</span>
       </span>
       <span className="plate-illustration">
+        {article.spacecraft && <SpacecraftDrawing kind={article.spacecraft.kind} />}
         {article.sketch && (
           <svg
             className="plate-constellation"
@@ -136,6 +138,7 @@ export function ArchiveBrowser({
   const article = articles[selected];
   const root = useRef<HTMLElement>(null);
   const constellation = !!article.constellation;
+  const spacecraft = !!article.spacecraft;
   const [season, setSeason] = useState("全部");
   const [query, setQuery] = useState("");
   const [hemisphere, setHemisphere] = useState("north");
@@ -150,7 +153,7 @@ export function ArchiveBrowser({
     .map((record, index) => ({ record, index }))
     .filter(({ record }) => constellation
       ? matches(record, season, query, hemisphere)
-      : !record.constellation);
+      : spacecraft ? !!record.spacecraft : !record.constellation && !record.spacecraft);
   const position = collection.findIndex((record) => record.index === selected);
   const chooseFilters = (s: string, q: string, half: string) => {
     setSeason(s);
@@ -166,11 +169,20 @@ export function ArchiveBrowser({
       (record) => !!record.constellation,
     ),
     foundation: 0,
+    spacecraft: articles.findIndex((record) => !!record.spacecraft),
   });
   useEffect(() => {
-    remembered.current[constellation ? "constellation" : "foundation"] =
+    remembered.current[constellation ? "constellation" : spacecraft ? "spacecraft" : "foundation"] =
       selected;
-  }, [selected, constellation]);
+  }, [selected, constellation, spacecraft]);
+  useEffect(() => {
+    const openMissions = () => {
+      if (location.hash === "#spacecraft") onSelect(remembered.current.spacecraft);
+    };
+    openMissions();
+    window.addEventListener("hashchange", openMissions);
+    return () => window.removeEventListener("hashchange", openMissions);
+  }, [onSelect]);
   const change = (index: number) => {
     if (!collection.length) return;
     const focusCover = document.activeElement?.closest(".archive-deck");
@@ -205,10 +217,11 @@ export function ArchiveBrowser({
   }, []);
   return (
     <section id="reading" className="section reveal archive-section" ref={root}>
+      <span id="spacecraft" className="spacecraft-anchor" aria-hidden="true" />
       <div className="section-heading">
         <span className="eyebrow">ASTRAL ATLAS / 天文知识档案</span>
         <h2>把每一次仰望，收进档案。</h2>
-        <p>循着四季找到星座，读它的故事，再回到真实的夜空。</p>
+        <p>循着四季读星座，沿着航迹读远行，把故事带回真实的宇宙。</p>
       </div>
       <div
         className="archive-browser"
@@ -235,12 +248,29 @@ export function ArchiveBrowser({
             星座档案 <span>CONSTELLATIONS</span>
           </button>
           <button
-            aria-pressed={!constellation}
+            aria-pressed={!constellation && !spacecraft}
             onClick={() => onSelect(remembered.current.foundation)}
           >
             宇宙基础 <span>FUNDAMENTALS</span>
           </button>
+          <button aria-pressed={spacecraft} onClick={() => onSelect(remembered.current.spacecraft)}>
+            深空探测器 <span>SPACECRAFT</span>
+          </button>
         </div>
+        {spacecraft && <div className="archive-filters mission-index">
+          <div className="archive-filter-heading">
+            <span className="eyebrow">MISSION FILES / 航天器任务索引</span>
+            <span className="mission-history">任务回顾 · 非实时遥测</span>
+          </div>
+          <p>从巨行星到月球背面，也收录面向宇宙的空间天文台。选择一艘航天器，读取它的远行记录。</p>
+          <div className="mission-directory">
+            {collection.map(({ record, index }) => <button key={record.slug} aria-pressed={selected === index} onClick={() => onSelect(index)}>
+              <SpacecraftDrawing kind={record.spacecraft!.kind} />
+              <span><strong>{record.archiveTitle}</strong><small>{record.spacecraft!.target}</small></span>
+              <span className="mission-file-id">{record.archiveId}</span>
+            </button>)}
+          </div>
+        </div>}
         {constellation && (
           <div className="archive-filters">
             <div className="archive-filter-heading">
@@ -325,6 +355,7 @@ export function ArchiveBrowser({
           <div className="archive-rule" />
           <h3 key={article.slug}>{article.title}</h3>
           <p>{article.description}</p>
+          {article.spacecraft && <p className="archive-location-note">{article.spacecraft.type} · {article.spacecraft.target}<br />结构识别示意，非工程图。任务日期与科学事实见档案所附官方资料。</p>}
           {article.constellation && (
             <p className="archive-location-note">
               {seasonName(article.constellation.season)}晚间档案 · {article.constellation.origin}<br />
@@ -390,7 +421,7 @@ export function ArchiveBrowser({
         </>}
       </div>
       <p className="archive-collection-note">
-        <a href={CATALOG_SOURCE} target="_blank" rel="noreferrer">全天星座名录与缩写依据</a> · 档案编号为本站编目，封面为编目图章或识别示意。故事为原创中文整理，神话与命名历史分开标注，逐篇附资料链接。
+        {spacecraft ? "航天器封面为本站绘制的结构识别示意，距离、尺寸与组件比例不用于测量。任务资料依据 NASA、ESA 与国家航天局，逐篇附官方链接。" : <><a href={CATALOG_SOURCE} target="_blank" rel="noreferrer">全天星座名录与缩写依据</a> · 档案编号为本站编目，封面为编目图章或识别示意。故事为原创中文整理，神话与命名历史分开标注，逐篇附资料链接。</>}
       </p>
     </section>
   );
@@ -471,7 +502,7 @@ export function ArchiveReader({ article }: { article: Article }) {
             </span>
             <FileText size={23} strokeWidth={1} />
           </div>
-          <p>封面为主题示意，不代表实际天体比例或观测星图。</p>
+          <p>{article.spacecraft ? "封面为航天器结构识别示意，不代表真实尺寸、组件比例或工程图。" : "封面为主题示意，不代表实际天体比例或观测星图。"}</p>
           <nav className="archive-related" aria-label="相邻档案">
             <a
               href={`#/articles/${previous.slug}`}
@@ -504,6 +535,7 @@ export function ArchiveReader({ article }: { article: Article }) {
             {article.archiveTitle}
           </h1>
           <p className="archive-document-en">{article.archiveEn}</p>
+          {article.spacecraft && <p className="archive-story-note">任务回顾 · 非实时遥测。历史节点与任务介绍依据所附官方资料。</p>}
           {article.constellation && (
             <p className="archive-story-note">
               {article.constellation.origin} · 文化叙事与观测事实分开记录，同一形象可能有多个传说版本。
@@ -517,7 +549,7 @@ export function ArchiveReader({ article }: { article: Article }) {
             </div>
             <div>
               <dt>TYPE / 文档类型</dt>
-              <dd>{article.constellation?.origin ?? "中文科普整理"}</dd>
+              <dd>{article.constellation?.origin ?? article.spacecraft?.type ?? "中文科普整理"}</dd>
             </div>
             <div>
               <dt>REFERENCES / 文献依据</dt>
@@ -620,7 +652,7 @@ export function ArchiveReader({ article }: { article: Article }) {
                 </span>
                 <h2>让每一份知识，都有出处。</h2>
                 <p>
-                  本档案为原创中文整理，并非逐字翻译。故事与命名史据逐星座资料核对；季节表用于编目，不替代设定了地点和时间的星图。以下资料在新窗口打开。
+                  {article.spacecraft ? "本档案为依据任务机构公开资料撰写的中文科普回顾。封面为本站绘制的结构示意，未使用官方照片。日期对应历史事件，不表示实时工作状态；最新进展请查阅下方官方页面。" : article.constellation ? "本档案为原创中文整理，并非逐字翻译。故事与命名史据逐星座资料核对；季节表用于编目，不替代设定了地点和时间的星图。以下资料在新窗口打开。" : "本档案为原创中文科普整理。科学依据与延伸阅读见以下资料，链接在新窗口打开。"}
                 </p>
                 {article.sources.map((source, i) => (
                   <a

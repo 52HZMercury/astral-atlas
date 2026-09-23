@@ -1323,3 +1323,22 @@
 .archive-directory-row > a { display: flex; align-items: center; gap: 4px; padding: 0 8px; color: #caa48e; font-size: 11px; min-width: 52px; justify-content: center; }
 .archive-directory-row > a:hover { background: #1c2935; color: #f0c6b0; }
 .archive-directory-row > a:focus-visible { outline-offset: -2px; }
+.archive-section { position: relative; }
+.spacecraft-anchor { position: absolute; top: 0; scroll-margin-top: 100px; }
+.spacecraft-drawing { display: block; width: 100%; height: 100%; }
+.archive-plate-spacecraft .plate-illustration { inset: 52px 18px 64px; }
+.mission-history { font: 11px var(--font-mono); color: #a5b4c1; }
+.mission-index > p { color: #a5b4c1; font-size: 13px; line-height: 1.8; margin: 15px 0 20px; }
+.mission-directory { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+.mission-directory button { display: flex; gap: 15px; align-items: center; min-width: 0; padding: 9px 12px 9px 0; min-height: 84px; text-align: left; color: #dce4eb; background: transparent; border: 0; border-bottom: 1px solid #2b3743; transition: background 180ms, color 180ms; }
+.mission-directory button:hover, .mission-directory button[aria-pressed="true"] { background: #e062360b; color: #eeb69d; }
+.mission-directory button[aria-pressed="true"] { box-shadow: inset 2px 0 #e06236; }
+.mission-directory .spacecraft-drawing { width: 84px; height: 66px; flex: 0 0 84px; }
+.mission-directory strong { display: block; font-size: 14px; font-weight: 500; }
+.mission-directory small { display: block; margin-top: 7px; font-size: 11px; color: #a5b4c1; }
+.mission-file-id { margin-left: auto; color: #899dac; font: 10px var(--font-mono); white-space: nowrap; }
+@media (max-width: 700px) {
+  .mission-directory { grid-template-columns: 1fr; }
+  .archive-collection-switch button { flex-direction: column; justify-content: center; }
+  .archive-collection-switch { gap: 12px; }
+}

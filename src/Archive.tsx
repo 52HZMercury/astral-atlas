@@ -602,6 +602,7 @@ export function ArchiveReader({ article }: { article: Article }) {
                 <h2>{article.title.replace("\n", "")}</h2>
                 <p>{article.description}</p>
                 <p>{article.sections[0][1]}</p>
+                {article.constellation && <p>{article.sections[1][1]}</p>}
                 <div className="archive-contents">
                   <span className="archive-panel-label">
                     CONTENTS / 档案目录

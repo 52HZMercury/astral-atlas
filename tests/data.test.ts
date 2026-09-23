@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { parseKp, isStale, toAU, planets, articles } from "../src/data.ts";
 import { constellationCatalog, seasons } from "../src/constellationCatalog.ts";
 import { constellationStories } from "../src/constellationStories.ts";
+import { constellationStoryDetails } from "../src/constellationStoryDetails.ts";
 import { constellationSketches } from "../src/constellationSketches.ts";
 test("NOAA records normalize UTC, sort, deduplicate, preserve zero and reject invalid values", () => {
   assert.deepEqual(
@@ -54,6 +55,8 @@ test("all article routes are unique and contain complete sourced sections", () =
 test("all 88 constellations have distinct stories, seasonal coverage and preserved public routes", () => {
   assert.equal(constellationCatalog.length, 88);
   assert.equal(constellationStories.length, 88);
+  assert.equal(Object.keys(constellationStoryDetails).length, 88);
+  assert.equal(new Set(Object.values(constellationStoryDetails)).size, 88);
   assert.equal(new Set(constellationStories.map((s) => s[0])).size, 88);
   assert.equal(new Set(constellationStories.map((s) => s[4])).size, 88);
   assert.equal(articles.length, 99);
@@ -62,6 +65,8 @@ test("all 88 constellations have distinct stories, seasonal coverage and preserv
     assert.equal(article.constellation?.abbr, record.abbr);
     assert.ok(article.sources.some((s) => s.url === record.url));
     assert.ok(article.sections[0][1].length >= 90, record.en);
+    assert.ok(article.sections[1][1].length >= 110, record.en);
+    assert.ok(article.sections[1][1] !== article.sections[0][1], record.en);
     assert.ok(seasons.includes(article.constellation!.season));
     assert.ok(article.constellation!.visibility.length > 0);
   }

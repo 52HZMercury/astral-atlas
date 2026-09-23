@@ -1,5 +1,6 @@
 import { constellationCatalog, SEASON_SOURCE, type Season } from "./constellationCatalog.ts";
 import { constellationStories } from "./constellationStories.ts";
+import { constellationStoryDetails } from "./constellationStoryDetails.ts";
 import { constellationSketches, LINE_SOURCE } from "./constellationSketches.ts";
 import { spacecraftArticles, type SpacecraftKind } from "./spacecraft.ts";
 
@@ -452,6 +453,8 @@ export const articles: Article[] = [
     const story = constellationStories.find((item) => item[0] === record.abbr);
     if (!story) throw new Error(`Missing constellation story: ${record.abbr}`);
     const [, name, title, origin, body, note, sky] = story;
+    const detail = constellationStoryDetails[record.abbr];
+    if (!detail) throw new Error(`Missing constellation story detail: ${record.abbr}`);
     const previous = baseArticles.find((a) => a.slug === record.slug);
     return {
       slug: record.slug,
@@ -466,6 +469,7 @@ export const articles: Article[] = [
       constellation: { abbr: record.abbr, season: record.season, origin, visibility: record.visibility },
       sections: [
         [`${origin} · ${title}`, body],
+        ["故事与来历 · 细节", detail],
         ["版本与名称辨析", note],
         ["从故事回到夜空", sky],
         ["季节与观测条件", `本档案按北半球的${record.season}晚间星空编排，南半球对应相反季节。季节是查阅线索，不代表只在这个季节可见。${record.visibility}近极星座在合适纬度可能全年可见；改变观测时刻也会改变能看到的星空。分组依据见参考资料中的季节星空表。`],

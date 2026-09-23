@@ -49,6 +49,7 @@ Pages 构建使用 `/astral-atlas/` 资源路径，普通本地构建仍使用�
 - 全部 88 个星座封面采用星点与连线，沿用猎户座的铜橙强调点和细线样式。原有猎户座、仙后座与北斗识别图、档案编号和路由保留，其余 85 份由真实天球坐标生成切平面识别图，中心北向上、东向左，按统一比例适配封面；图示不表示当地实时星空、真实距离或星座边界，强调点不编码星等。
 - 连线原始数据保存于 `src/constellationLines.json`，来自 [d3-celestial 固定版本](https://github.com/ofrohn/d3-celestial/blob/d2e20e104b86429d90ac8227a5b021262b45d75a/data/constellations.lines.json)，作者 Olaf Frohn，BSD-3-Clause。完整版权与许可在 `public/d3-celestial-LICENSE.txt`，会随网站发布，档案库提供链接。`src/constellationSketches.ts` 合并巨蛇座的两片天区，处理赤经跨零点与极区投影；运行时无外部数据请求。
 - 内容是独立撰写的中文摘要，区分古典神话、航海制图、仪器命名与历史纪念，不以星座解释性格或命运。逐星座出处在每篇「参考资料」中。用户提供的知乎主页访问返回 403，未将无法读取的文章列作已使用来源。
+- 88 份星座故事均增写「故事与来历 · 细节」段落：古典神话补人物、动机和事件过程，近代星座补命名者、器具或动物原型及后续改名。档案概览与正文都能阅读全文；新增内容维护于 `src/constellationStoryDetails.ts`。用户提供的知乎文章列表同样返回 403，本次依据各档案所列的 Constellation Guide 对应页面核对，不将知乎内容列作已读资料。
 - 名录与季节信息维护于 `src/constellationCatalog.ts`，中文故事维护于 `src/constellationStories.ts`，`src/data.ts` 组合内容并保留旧档案。核对时已读取全部 88 个对应资料页；网站运行时不依赖这些页面请求。
 - 档案库支持点击、左右方向键、Home/End 与前后切换按钮；详情页签支持方向键，目录可跳到正文对应段落。返回档案库保留当前选档。移动端正文随页面自然滚动，桌面使用独立阅读区。
 - 档案封面和抽取反馈使用 CSS，不新增 WebGL 场景，也不复制参考项目的模型、品牌、字体或虚构授权信息。`src/data.ts` 中的 `archiveId` 为稳定站内编号；插图为主题示意。

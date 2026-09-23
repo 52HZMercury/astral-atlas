@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { parseKp, isStale, toAU, planets, articles } from "../src/data.ts";
 import { constellationCatalog, seasons } from "../src/constellationCatalog.ts";
 import { constellationStories } from "../src/constellationStories.ts";
+import { constellationSketches } from "../src/constellationSketches.ts";
 test("NOAA records normalize UTC, sort, deduplicate, preserve zero and reject invalid values", () => {
   assert.deepEqual(
     parseKp([
@@ -86,4 +87,37 @@ test("spacecraft archives preserve the catalogue and cite mission agencies", () 
     assert.ok(a.sources.every((s) => ["science.nasa.gov", "www.esa.int", "www.cnsa.gov.cn"].includes(new URL(s.url).hostname)));
     assert.ok(a.spacecraft!.target && a.spacecraft!.type);
   });
+});
+
+test("every constellation has a connected-line cover within the viewport", () => {
+  assert.equal(Object.keys(constellationSketches).length, 88);
+  const signatures = new Set<string>();
+  for (const a of articles.filter((a) => a.constellation)) {
+    const sketch = a.sketch!;
+    assert.ok(sketch, a.slug);
+    assert.ok(sketch.points.length >= 2 && sketch.links.length > 0, a.slug);
+    assert.ok(sketch.points.every(([x, y]) => Number.isFinite(x) && Number.isFinite(y) && x >= 12 && x <= 208 && y >= 12 && y <= 178), a.slug);
+    assert.ok(sketch.points.every((_, i) => sketch.links.some((line) => line.includes(i))), a.slug);
+    signatures.add(JSON.stringify(sketch));
+  }
+  assert.equal(signatures.size, 88);
+  // Serpens remains two disconnected figures in one catalogue entry.
+  const ser = constellationSketches.Ser;
+  const visited = new Set<number>();
+  let components = 0;
+  for (let i = 0; i < ser.points.length; i++) {
+    if (visited.has(i)) continue;
+    components++;
+    const pending = [i];
+    while (pending.length) {
+      const point = pending.pop()!;
+      if (visited.has(point)) continue;
+      visited.add(point);
+      for (const [a, b] of ser.links) {
+        if (a === point && !visited.has(b)) pending.push(b);
+        if (b === point && !visited.has(a)) pending.push(a);
+      }
+    }
+  }
+  assert.equal(components, 2);
 });

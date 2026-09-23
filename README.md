@@ -46,7 +46,8 @@ Pages 构建使用 `/astral-atlas/` 资源路径，普通本地构建仍使用�
 - 新增「深空探测器」分类与导航入口 `#spacecraft`，收录旅行者双子、先锋十号、卡西尼—惠更斯、新视野、朱诺、韦布、罗塞塔—菲莱与嫦娥四号。韦布明确标为空间天文台，任务历史不冒充实时遥测；每篇附 NASA、ESA 或国家航天局官方出处。
 - 航天器使用八种独立的 SVG 结构示意，突出碟形天线、仪器臂、太阳能翼、镜面或着陆支腿。列表和档案封面共用图案，不依赖外部图片或额外 3D 场景。内容维护于 `src/spacecraft.ts`，图案维护于 `src/SpacecraftDrawing.tsx`；新增档案编号为 AA-092 至 AA-099，旧编号及路由保持稳定。
 - 星座可按四季筛选，支持南北半球季节参照切换和中文名、拉丁名、IAU 缩写定位。北半球分组为春季 21、夏季 27、秋季 17、冬季 23 份；依据 [Constellation Guide 季节表](https://www.constellation-guide.com/seasonal-constellations/)。这是晚间阅读与观星编目，不代表只在该季节可见，也不保证当地可见。近极星群可能全年可见，深南天档案明确提示纬度限制。
-- 原有 `#/articles/orion`、`#/articles/cassiopeia`、`#/articles/ursa-major` 地址、档案编号、识别图与观测正文保留。其余使用拉丁名路由，例如 `#/articles/andromeda`。新的封面采用 IAU 缩写编目图章，不伪造星图。
+- 全部 88 个星座封面采用星点与连线，沿用猎户座的铜橙强调点和细线样式。原有猎户座、仙后座与北斗识别图、档案编号和路由保留，其余 85 份由真实天球坐标生成切平面识别图，中心北向上、东向左，按统一比例适配封面；图示不表示当地实时星空、真实距离或星座边界，强调点不编码星等。
+- 连线原始数据保存于 `src/constellationLines.json`，来自 [d3-celestial 固定版本](https://github.com/ofrohn/d3-celestial/blob/d2e20e104b86429d90ac8227a5b021262b45d75a/data/constellations.lines.json)，作者 Olaf Frohn，BSD-3-Clause。完整版权与许可在 `public/d3-celestial-LICENSE.txt`，会随网站发布，档案库提供链接。`src/constellationSketches.ts` 合并巨蛇座的两片天区，处理赤经跨零点与极区投影；运行时无外部数据请求。
 - 内容是独立撰写的中文摘要，区分古典神话、航海制图、仪器命名与历史纪念，不以星座解释性格或命运。逐星座出处在每篇「参考资料」中。用户提供的知乎主页访问返回 403，未将无法读取的文章列作已使用来源。
 - 名录与季节信息维护于 `src/constellationCatalog.ts`，中文故事维护于 `src/constellationStories.ts`，`src/data.ts` 组合内容并保留旧档案。核对时已读取全部 88 个对应资料页；网站运行时不依赖这些页面请求。
 - 档案库支持点击、左右方向键、Home/End 与前后切换按钮；详情页签支持方向键，目录可跳到正文对应段落。返回档案库保留当前选档。移动端正文随页面自然滚动，桌面使用独立阅读区。

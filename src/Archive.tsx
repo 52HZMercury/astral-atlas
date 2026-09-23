@@ -17,6 +17,7 @@ import {
 import { articles } from "./data";
 import { SpacecraftDrawing } from "./SpacecraftDrawing";
 import { seasons, SEASON_SOURCE, CATALOG_SOURCE, type Season } from "./constellationCatalog";
+import { LINE_SOURCE } from "./constellationSketches";
 import "./archive.css";
 
 type Article = (typeof articles)[number];
@@ -83,13 +84,6 @@ function ArchivePlate({ article }: { article: Article }) {
               </g>
             ))}
           </svg>
-        )}
-        {article.constellation && !article.sketch && (
-          <span className="plate-catalog-stamp">
-            <span>CONSTELLATION / 编目图章</span>
-            <strong>{article.constellation.abbr}</strong>
-            <small>{article.constellation.origin} · 非观测星图</small>
-          </span>
         )}
         {article.image === "saturn" && (
           <>
@@ -421,7 +415,7 @@ export function ArchiveBrowser({
         </>}
       </div>
       <p className="archive-collection-note">
-        {spacecraft ? "航天器封面为本站绘制的结构识别示意，距离、尺寸与组件比例不用于测量。任务资料依据 NASA、ESA 与国家航天局，逐篇附官方链接。" : <><a href={CATALOG_SOURCE} target="_blank" rel="noreferrer">全天星座名录与缩写依据</a> · 档案编号为本站编目，封面为编目图章或识别示意。故事为原创中文整理，神话与命名历史分开标注，逐篇附资料链接。</>}
+        {spacecraft ? "航天器封面为本站绘制的结构识别示意，距离、尺寸与组件比例不用于测量。任务资料依据 NASA、ESA 与国家航天局，逐篇附官方链接。" : <><a href={CATALOG_SOURCE} target="_blank" rel="noreferrer">全天星座名录依据</a> · 封面为识别示意，不代表当地实时星空；连线有不同画法，并非星座边界。新增连线依据 <a href={LINE_SOURCE} target="_blank" rel="noreferrer">d3-celestial / Olaf Frohn</a>（<a href="./d3-celestial-LICENSE.txt" target="_blank" rel="noreferrer">BSD 许可</a>），保留猎户座、仙后座与北斗原有示意。强调点不表示亮度等级。</>}
       </p>
     </section>
   );
@@ -502,7 +496,7 @@ export function ArchiveReader({ article }: { article: Article }) {
             </span>
             <FileText size={23} strokeWidth={1} />
           </div>
-          <p>{article.spacecraft ? "封面为航天器结构识别示意，不代表真实尺寸、组件比例或工程图。" : "封面为主题示意，不代表实际天体比例或观测星图。"}</p>
+          <p>{article.spacecraft ? "封面为航天器结构识别示意，不代表真实尺寸、组件比例或工程图。" : article.constellation ? "封面为星座连线识别示意，不代表实际观测方向、星座边界或星体间的真实距离。强调点不表示亮度等级。" : "封面为主题示意，不代表实际天体比例或观测星图。"}</p>
           <nav className="archive-related" aria-label="相邻档案">
             <a
               href={`#/articles/${previous.slug}`}

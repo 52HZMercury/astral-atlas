@@ -1,5 +1,6 @@
 import { constellationCatalog, SEASON_SOURCE, type Season } from "./constellationCatalog.ts";
 import { constellationStories } from "./constellationStories.ts";
+import { constellationSketches, LINE_SOURCE } from "./constellationSketches.ts";
 import { spacecraftArticles, type SpacecraftKind } from "./spacecraft.ts";
 
 export const NASA_FACTS = "https://nssdc.gsfc.nasa.gov/planetary/factsheet/";
@@ -461,7 +462,7 @@ export const articles: Article[] = [
       title,
       description: `${name} · ${body.split("。").slice(0, 2).join("。")}。`,
       image: "constellation",
-      sketch: previous?.sketch,
+      sketch: previous?.sketch ?? constellationSketches[record.abbr],
       constellation: { abbr: record.abbr, season: record.season, origin, visibility: record.visibility },
       sections: [
         [`${origin} · ${title}`, body],
@@ -473,6 +474,7 @@ export const articles: Article[] = [
       sources: [
         { label: `Constellation Guide · ${record.en}：来历、星图与观测资料`, url: record.url },
         { label: "Constellation Guide · 晚间季节分组与适用条件", url: SEASON_SOURCE },
+        ...(!previous ? [{ label: "d3-celestial · 星座连线数据（Olaf Frohn，BSD-3-Clause）", url: LINE_SOURCE }] : []),
         ...(previous?.sources ?? []),
       ],
     };
